@@ -1,0 +1,59 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <form class="form" method="post" enctype="multipart/form-data">
+      <div class="pull-left">
+        <div class="btn-group">
+          <a href="<?php echo $this->linkToRoute('admin-users-list');?>" class="btn btn-success">
+            <i class="fa fa-arrow-circle-left"></i> Back to list
+          </a>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" type="submit">
+            <i class="fa fa-save"></i> Save
+          </button>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+      <hr>
+<?php
+
+if (isset($this->result)) {
+    $status = (isset($this->result['errors']) ? 'danger' : 'success');
+    echo Fennec\Library\Alerts::Create($status, $this->result['result']);
+}
+?>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+            <label for="title">Name</label>
+            <input type="text" name="name" id="name" class="form-control" required value="<?php echo (isset($this->name) ? $this->name : null);?>" maxlength="64">
+          </div>
+
+          <div class="col-sm-12 col-md-6">
+            <label for="url">Email</label>
+            <input type="email" name="email" id="email" class="form-control" value="<?php echo (isset($this->email) ? $this->email : null);?>">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+            <label for="url">Username</label>
+            <input type="text" name="username" id="username" class="form-control" value="<?php echo (isset($this->username) ? $this->username : null);?>" maxlength="64">
+          </div>
+          
+          <div class="col-sm-12 col-md-6">
+            <label for="url">Password</label>
+            <input type="text" name="password" id="password" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-success">
+          <i class="fa fa-save"></i> Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

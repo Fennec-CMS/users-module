@@ -1,0 +1,9 @@
+<a href="<?php echo $this->linkToRoute('blog-base');?>" class="btn btn-info btn-xs">Back</a>
+<h1><?php echo $this->post->getTitle();?></h1>
+
+<br>
+<section>
+<?php
+echo $this->post->getBody();
+?>
+</section>
