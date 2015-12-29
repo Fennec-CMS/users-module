@@ -2,7 +2,7 @@
     <div class="panel-body">
         <div class="pull-left">
             <div class="btn-group">
-                <a href="<?php echo $this->linkToRoute('admin-users-create');?>" class="btn btn-success"><i class="fa fa-plus-circle"></i> Write new post</a>
+                <a href="<?php echo $this->linkToRoute('admin-user-create');?>" class="btn btn-success"><i class="fa fa-plus-circle"></i> Register new user</a>
             </div>
         </div>
         <div class="clearfix"></div>
@@ -12,6 +12,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Date registered</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -25,6 +26,7 @@ foreach ($this->list as $user) {
                 <tr>
                     <td><?php echo $user->getName();?></td>
                     <td><?php echo $user->getEmail();?></td>
+                    <td><?php echo $user->getTimestamp()->format('Y-m-d H:i');?></td>
                     <td>
                         <a href="<?php echo $this->linkToRoute('admin-user-edit', array($user->getId()));?>">
                             <i class="fa fa-pencil"></i>

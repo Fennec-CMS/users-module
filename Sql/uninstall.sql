@@ -1,8 +1,6 @@
 /*
- * This file deletes permanently 'blog' and 'tags' tables.
+ * This file deletes permanently 'users' table.
  * Please make sure that you have all needed backup
  */
 
-DROP TABLE tags;
-DROP TABLE blog;
-
+DROP TABLE users;

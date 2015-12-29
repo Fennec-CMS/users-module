@@ -1,7 +1,7 @@
 <?php
 return array(
     'Users' => array(
-        'route' => 'admin-blog-users',
+        'route' => 'admin-users-list',
         'icon' => 'fa fa-pencil',
         'subitems' => array(
             'List' => 'admin-users-list',

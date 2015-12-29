@@ -11,7 +11,7 @@ use \Fennec\Controller\Admin\Index as AdminController;
 use \Fennec\Modules\Users\Model\User as UserModel;
 
 /**
- * Sample custom module (Admin controller)
+ * Users (not administrators) module
  *
  * @author David Lima
  * @version 1.0
@@ -32,7 +32,6 @@ class Index extends AdminController
         parent::__construct();
 
         $this->model = new UserModel();
-        
 
         $this->moduleInfo = array(
             'title' => 'Users'
@@ -48,7 +47,7 @@ class Index extends AdminController
     }
 
     /**
-     * If is a POST, try to save a new (or edit a) post. Show form otherwise
+     * If is a POST, try to save a new (or edit a) user. Show form otherwise.
      */
     public function createAction()
     {
@@ -71,19 +70,13 @@ class Index extends AdminController
                 foreach ($this->getPost() as $postKey => $postValue) {
                     $this->$postKey = $postValue;
                 }
-
-                $this->model->setTitle($this->getPost('title'));
-                $this->model->setSeodescription($this->getPost('seodescription'));
-                $this->model->setPreview($this->getPost('preview'));
-                $this->model->setBody($this->getPost('body'));
-                $this->model->setPublishDate($this->getPost('publishdate'));
-                $this->model->setTags($this->getPost('tags'));
-                $this->model->setUrl($this->getPost('url'));
+                
+                $this->model->setName($this->getPost('name'));
+                $this->model->setUsername($this->getPost('username'));
+                $this->model->setEmail($this->getPost('email'));
+                $this->model->setPassword($this->getPost('password'));
                 $this->model->setStatus($this->getPost('status'));
-
-                $tags = new TagsModel();
-                $tags->learnTags(explode(',', $this->getPost('tags')));
-
+                
                 $this->result = $this->model->create();
                 if (isset($this->result['errors'])) {
                     $this->result['result'] = implode('<br>', $this->result['errors']);

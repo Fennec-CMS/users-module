@@ -5,41 +5,26 @@
  * @license Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  ************************************************************************
  */
-namespace Fennec\Modules\Blog\Controller;
+namespace Fennec\Modules\Users\Controller;
 
 use \Fennec\Controller\Base;
-use \Fennec\Modules\Blog\Model\Blog as BlogModel;
-use \Fennec\Services\Settings;
+use \Fennec\Modules\Users\Model\User as UserModel;
 
 /**
- * Blog module
+ * Users module
  *
  * @author David Lima
  * @version 1.0
  */
 class Index extends Base
 {
-    use \Fennec\Library\Urls;
 
     /**
-     * Default number of posts shown on listing
+     * User Model
      *
-     * @var integer
-     */
-    const DEFAULT_POSTS_PER_PAGE = 10;
-
-    /**
-     * Blog Model
-     *
-     * @var \Fennec\Modules\Blog\Model\Blog
+     * @var \Fennec\Modules\Users\Model\User
      */
     private $model;
-    
-    /**
-     * Settings object
-     * @var Settings $settings
-     */
-    public $settings;
 
     /**
      * Defines $this->model
@@ -48,97 +33,67 @@ class Index extends Base
     {
         parent::__construct();
         
-        $this->settings = new Settings('Blog');
-        
-        $this->model = new BlogModel();
+        $this->model = new UserModel();
     }
 
-    /**
-     * Default action
-     */
-    public function indexAction()
+    public function loginAction()
     {
-        $title = "Blog module";
-        if ($this->getParam('page')) {
-            $page = intval($this->getParam('page'));
-            $title .= " :: Page $page";
-        } else {
-            $page = 1;
+        if ($this->isPost()) {
+            $this->model->setUsername($this->getPost('username'));
+            $this->model->setPassword($this->getPost('password'));
+            $this->model->authenticate();
+            
+            if (! $this->isAuthenticated()) {
+                $this->errors = array(
+                    $this->translate('Cannot authenticate you')
+                );
+            }
         }
-
-        $this->setTitle($title);
         
-        $postsPerPage = $this->settings->getSetting('postsPerPage');
-        if (! $postsPerPage) {
-            $postsPerPage = self::DEFAULT_POSTS_PER_PAGE;
+        if ($this->isAuthenticated()) {
+            header("Location: " . $this->linkToRoute('user-profile'));
         }
-
-        $this->posts = $this->model->getActivePosts($postsPerPage, $page);
-        $this->totalPosts = $this->model->countArticles();
-        $this->totalPages = ceil($this->totalPosts / $postsPerPage);
     }
 
-    /**
-     * If $_GET['slug'] is a valid post, sets it to $this->post
-     */
-    public function readAction()
+    public function registerAction()
     {
-        if ($this->getParam('slug')) {
-            $slug = $this->toSlug($this->getParam('slug'));
-            $post = $this->model->getByColumn('url', $slug);
-
-            if (count($post)) {
-                $this->post = $post[0];
-                $this->setTitle($this->post->getTitle());
-            } else {
-                $this->throwHttpError(404);
+        if ($this->isPost()) {
+            try {
+                foreach ($this->getPost() as $postKey => $postValue) {
+                    $this->$postKey = $postValue;
+                }
+                
+                $this->model->setName($this->getPost('name'));
+                $this->model->setUsername($this->getPost('username'));
+                $this->model->setEmail($this->getPost('email'));
+                $this->model->setPassword($this->getPost('password'));
+                $this->model->setStatus(0);
+                
+                $this->result = $this->model->create();
+                if (isset($this->result['errors'])) {
+                    $this->result['result'] = implode('<br>', $this->result['errors']);
+                }
+            } catch (\Exception $e) {
+                $this->exception = $e;
+                $this->throwHttpError(500);
             }
         }
     }
     
-    /**
-     * Return valid XML containing RSS feeds for blog entries
-     */
-    public function rssAction()
+    public function profileAction()
     {
-        header("Content-Type: text/xml");
-
-        $posts = $this->model->getActivePosts((int) $this->settings->rssTotalPosts);
-        $items = "";
-        
-        foreach ($posts as $item) {
-            $body = strip_tags($item->body);
-            $link = "http://" . $_SERVER['HTTP_HOST'] . $this->linkToRoute('blog-read', array($item->url));
-            
-            $items .= <<<XML
-    <item>
-        <title><![CDATA[{$item->title}]]></title>
-        <link>{$link}</link>
-        <guid>{$link}</guid>
-        <description><![CDATA[{$body}]]></description>
-    </item>
-
-XML;
+        if (! $this->isAuthenticated()) {
+            header("Location: " . $this->linkToRoute('users-authenticate'));
         }
-        
-        $xml = <<<XML
-<?xml version="1.0" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-    <atom:link href="http://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" rel="self" type="application/rss+xml" />
-    <title><![CDATA[{$this->settings->rssChannelTitle}]]></title>
-    <description><![CDATA[{$this->settings->rssChannelDescription}]]></description>
-    <link>http://{$_SERVER['HTTP_HOST']}</link>
-    <image>
-        <url>http://{$_SERVER['HTTP_HOST']}/assets/img/rss.png</url>
-        <link>http://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}</link>
-        <title><![CDATA[{$this->settings->rssChannelTitle}]]></title>
-    </image>
-$items
-</channel>
-</rss>
-XML;
-        echo $xml;
-    
+    }
+
+    /**
+     * Check if there is an user authenticated
+     *
+     * @return boolean
+     */
+    private function isAuthenticated()
+    {
+        return (isset($_SESSION['fennecUser']) && $_SESSION['fennecUser'] instanceof \Fennec\Modules\Users\Model\User);
     }
 }

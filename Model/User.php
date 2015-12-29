@@ -122,7 +122,7 @@ class User extends Base
     {
         return $this->select("*")
             ->from(self::$table)
-            ->order('publishdate', 'DESC')
+            ->order('timestamp', 'DESC')
             ->execute();
     }
 
@@ -137,11 +137,17 @@ class User extends Base
         if (! $errors['valid']) {
             return $errors;
         }
-
+        
+        if ($this->id && ! $this->password) {
+            $user = $this->getByColumn('id', $this->id, 1);
+            $this->password = $user->password;
+        } else {
+            $this->password = self::hash($this->password);
+        }
+        
         $this->name = filter_var($this->name, \FILTER_SANITIZE_STRING);
         $this->username = filter_var($this->username, \FILTER_SANITIZE_STRING);
         $this->email = filter_var($this->email, \FILTER_SANITIZE_STRING);
-        $this->password = self::hash($this->password);
         $this->status = intval($this->status);
         $this->timestamp = (empty($this->timestamp) ? date("Y-m-d H:i:s") : $this->timestamp);
 
@@ -153,6 +159,31 @@ class User extends Base
             'status' => $this->status,
             'timestamp' => $this->timestamp
         );
+    }
+    
+    /**
+     * Authenticate an user
+     *
+     * @return boolean
+     */
+    public function authenticate()
+    {
+        $this->username = filter_var($this->username, \FILTER_SANITIZE_STRING);
+        $userExists = $this->select('*')
+        ->from(self::$table)
+        ->where("username = '{$this->username}'")
+        ->limit(1)
+        ->execute();
+        $userData = $userExists->fetch();
+    
+        if ($userData) {
+            if ($this->verify($this->password, $userData->getPassword())) {
+                $_SESSION['fennecUser'] = $userData;
+                return true;
+            }
+        }
+    
+        return false;
     }
 
     /**

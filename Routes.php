@@ -28,6 +28,30 @@ $routes = array(
         'controller' => 'Admin\\Index',
         'action' => 'create',
         'layout' => 'Admin/Default'
+    ),
+    array(
+        'name' => 'users-authenticate',
+        'route' => '/accounts/login/',
+        'module' => 'Users',
+        'controller' => 'Index',
+        'action' => 'login',
+        'layout' => 'Default'
+    ),
+    array(
+        'name' => 'users-register',
+        'route' => '/accounts/create/',
+        'module' => 'Users',
+        'controller' => 'Index',
+        'action' => 'register',
+        'layout' => 'Default'
+    ),
+    array(
+        'name' => 'user-profile',
+        'route' => '/accounts/me/',
+        'module' => 'Users',
+        'controller' => 'Index',
+        'action' => 'profile',
+        'layout' => 'Default'
     )
 );
 
